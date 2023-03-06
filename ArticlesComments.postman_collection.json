@@ -1,0 +1,246 @@
+{
+	"info": {
+		"_postman_id": "dfb0decc-b0a3-45ea-a44b-b1c38e855dfb",
+		"name": "Articles Comments",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get one article",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "auth",
+						"value": "Bearer 04b75663497314d10a214014378054c8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8741/api/article/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8741",
+					"path": [
+						"api",
+						"article",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List article comments",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "auth",
+						"value": "Bearer 04b75663497314d10a214014378054c8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8741/api/article/1/comment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8741",
+					"path": [
+						"api",
+						"article",
+						"1",
+						"comment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List comments answers",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "auth",
+						"value": "Bearer 04b75663497314d10a214014378054c8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8741/api/comment/1/answer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8741",
+					"path": [
+						"api",
+						"comment",
+						"1",
+						"answer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Comment article",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "auth",
+						"value": "Bearer 04b75663497314d10a214014378054c8",
+						"type": "text"
+					},
+					{
+						"key": "first",
+						"value": "5",
+						"type": "text"
+					},
+					{
+						"key": "second",
+						"value": "25",
+						"type": "text"
+					},
+					{
+						"key": "value",
+						"value": "5",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"content\": \"content\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8741/api/article/1/comment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8741",
+					"path": [
+						"api",
+						"article",
+						"1",
+						"comment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Answer to one comment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "auth",
+						"value": "Bearer 04b75663497314d10a214014378054c8",
+						"type": "text"
+					},
+					{
+						"key": "first",
+						"value": "5",
+						"type": "text"
+					},
+					{
+						"key": "second",
+						"value": "25",
+						"type": "text"
+					},
+					{
+						"key": "value",
+						"value": "5",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"content\": \"content\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8741/api/comment/5/answer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8741",
+					"path": [
+						"api",
+						"comment",
+						"5",
+						"answer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rating comment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "auth",
+						"value": "Bearer 04b75663497314d10a214014378054c8",
+						"type": "text"
+					},
+					{
+						"key": "first",
+						"value": "5",
+						"type": "text"
+					},
+					{
+						"key": "second",
+						"value": "25",
+						"type": "text"
+					},
+					{
+						"key": "value",
+						"value": "5",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"rate\": 5}"
+				},
+				"url": {
+					"raw": "http://localhost:8741/api/comment/5/rate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8741",
+					"path": [
+						"api",
+						"comment",
+						"5",
+						"rate"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

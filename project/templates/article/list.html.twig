@@ -1,0 +1,18 @@
+{% extends "base.html.twig" %}
+
+{% block content %}
+    {% for article in articles %}
+        <!-- Post preview-->
+        <div class="post-preview">
+            <a href="{{ path('article_view', {'articleId': article.id}) }}">
+                <h2 class="post-title">{{ article.title }}</h2>
+                <h3 class="post-subtitle">{{ article.content | length > 40 ? article.content | slice(0, 40) ~ '...' : article.length }}</h3>
+            </a>
+            <p class="post-meta">
+                Posted by
+                Blog Article
+                on September 24, 2022
+            </p>
+        </div>
+    {% endfor %}
+{% endblock %}

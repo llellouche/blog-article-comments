@@ -1,0 +1,249 @@
+<div class="container bootdey">
+    <div class="col-md-12 bootstrap snippets">
+        <div class="panel">
+            <div class="panel-body">
+                {% if app.user %}
+                    <textarea class="comment-content form-control" rows="2" placeholder="What are you thinking?"></textarea>
+                    <div class="mar-top clearfix">
+                        <button class="submit-comment btn btn-sm bg-dark pull-right" disabled style="float: right; color: white" type="submit"><i class="fa fa-pencil fa-fw"></i> Comment</button>
+                    </div>
+                {% else %}
+                    <div class="mar-top clearfix">
+                        <ul class="list-inline text-center">
+                            <h3>Connect for comment, rating and view answers</h3>
+                            <br>
+                            <li class="list-inline-item">
+                                <a href="{{ path('connect_google_start') }}">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fas fa-circle fa-stack-2x"></i>
+                                        <i class="fab fa-google fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="{{ path('connect_facebook_start') }}">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fas fa-circle fa-stack-2x"></i>
+                                        <i class="fab fa-facebook-f fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-body panel-body-comments">
+                {% for comment in comments %}
+                    <div class="media-block">
+                        <a class="media-left"><img class="img-circle img-sm" alt="Profile Picture" src="{{ comment.user.picture }}"></a>
+                        <div class="media-body" data-id= "{{ comment.id }}">
+                            <div class="mar-btm">
+                                <a class="author btn-link text-semibold media-heading box-inline">{{ comment.user.fullName() }}
+                                    - {{ comment.createDate | date("g:i A m/d/Y") }}</a>
+                            </div>
+                            <p class="comment">{{ comment.content }}</p>
+                            <div class="pad-ver">
+                                <div class="btn-group">
+                                    <div class="comment-rating jq-stars" data-comment-rating="{{ comment.rate }}" data-comment-id="{{ comment.id }}"></div>
+                                </div>
+                                {% if app.user %}
+                                    <textarea class="comment-answer form-control" rows="2" data-comment-id="{{ comment.id }}" placeholder="What are you thinking?"></textarea>
+                                    <div class="mar-top clearfix">
+                                        <button class="submit-answer btn btn-sm bg-dark pull-right" data-comment-id="{{ comment.id }}" disabled style="float: right; color: white" type="submit"><i class="fa fa-pencil fa-fw"></i> Answer</button>
+                                    </div>
+                                    <div>
+                                        <a class="load-answers btn btn-sm btn-default btn-hover-primary" data-id= "{{ comment.id }}">Load answers</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var userToken = null;
+    {% if app.user %}
+    // Set Token as global Javascript variable
+    userToken = '{{ app.user.token }}'
+    {% endif %}
+
+    function rateComment(currentRating, $el) {
+        let commentId = $el.data('comment-id');
+        let path = "{{ path('api_rate_comment', {'commentId': 'COMMENT_ID'}) }}";
+        path = path.replace('COMMENT_ID', commentId);
+
+        let first = Math.floor(Math.random() * 2500);
+        let second = Math.floor(Math.random() * 2500);
+        let result = first % second;
+
+        $.ajax({
+            url: path,
+            type: 'POST',
+            headers: {
+                auth: 'Bearer ' + userToken,
+                first: first,
+                second: second,
+                value: result
+            },
+            data: JSON.stringify({
+                'rate': currentRating
+            }),
+            dataType: 'json',
+            success: function (data) {
+            }
+        });
+    }
+
+    // Init stars rating
+    $(function() {
+        $('.comment-rating').each((i, elem) => {
+            $(".comment-rating[data-comment-id=" + $(elem).data('comment-id') + "]").starRating({
+                initialRating: parseFloat($(elem).data('comment-rating')),
+                starSize: 25,
+                readOnly: ! userToken,
+                forceRoundUp: true,
+                callback: (currentRating, $el) => {
+                    rateComment(currentRating, $el);
+                }
+            });
+        });
+    });
+
+    $(document).ready(() => {
+        // Load answers action (only connected users)
+        $('.load-answers').click((e) => {
+            // Avoid loading answers many times
+            if ($(e.target).hasClass('already')) {
+                return;
+            }
+
+            let commentId = $(e.target).data('id');
+            let path = "{{ path('api_get_comment_answers', {'commentId': 'COMMENT_ID'}) }}";
+            path = path.replace('COMMENT_ID', commentId);
+
+            $.ajax({
+                url: path,
+                type: 'GET',
+                headers: {
+                    auth: 'Bearer ' + userToken
+                },
+                dataType: 'json',
+                success: function (data) {
+                    let htmlContent = '';
+                    console.info(data);
+                    data.forEach((d) => {
+                        console.log(d);
+                        htmlContent += '<div><div class="media-block"><a class="media-left"><img class="profile-picture img-circle img-sm" alt="Profile Picture" src="' + d.user_picture + '"></a> <div class="media-body"> <div class="mar-btm"> <a class="author btn-link text-semibold media-heading box-inline">' + d.user_fullname + '</a> </div> <p class="comment">' + d.content + '</p> <div class="pad-ver"> <div class="btn-group"> </div> </div> <hr></div></div></div>';
+                    });
+
+                    if (htmlContent.length === 0) {
+                        htmlContent = '<div><div class="media-block"><div class="media-body"><div class="mar-btm"><h5>No answers for this comment</h5></div><hr/></div></div></div>';
+                    }
+                    $('.media-body[data-id=' + commentId + ']').append(htmlContent);
+                    console.log($(e.target));
+                    $(e.target).addClass('already');
+                }
+            });
+        });
+
+        // Disable and Enable Submit comment button
+        $('.comment-content').keyup((e) => {
+            let length = $(e.target).val().length;
+            console.log(length);
+
+            if (length > 0) {
+                $('.submit-comment').removeAttr('disabled');
+            } else {
+                $('.submit-comment').attr('disabled', 'disabled');
+            }
+        });
+
+        // Disable and Enable Submit comment button
+        $('.comment-answer').keyup((e) => {
+            let length = $(e.target).val().length;
+            let commentId = $(e.target).data('comment-id');
+            console.log(length);
+
+            if (length > 0) {
+                $('.submit-answer[data-comment-id=' + commentId + ']').removeAttr('disabled');
+            } else {
+                $('.submit-answer[data-comment-id=' + commentId + ']').attr('disabled', 'disabled');
+            }
+        });
+
+        // Right comment action (only connected users)
+        $('.submit-comment').click((e) => {
+            let path = "{{ path('api_create_comment', {'articleId': article.id}) }}";
+            let first = Math.floor(Math.random() * 2500);
+            let second = Math.floor(Math.random() * 2500);
+            let result = first % second;
+
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data: JSON.stringify({
+                    'content': $('.comment-content').val()
+                }),
+                headers: {
+                    auth: 'Bearer ' + userToken,
+                    first: first,
+                    second: second,
+                    value: result
+                },
+                dataType: 'json',
+                success: function (d) {
+                    let htmlContent = '';
+                    console.info(d);
+                    htmlContent += '<div class="media-block"><a class="media-left"><img class="profile-picture img-circle img-sm" alt="Profile Picture" src="' + d.user_picture + '"></a> <div class="media-body"> <div class="mar-btm"> <a class="author btn-link text-semibold media-heading box-inline">' + d.user_fullname + ' - Just now</a> </div> <p class="comment">' + d.content + '</p> <div class="pad-ver"> <div class="btn-group"> </div> </div> <hr></div></div>';
+                    $('.panel-body-comments').prepend(htmlContent);
+                    $('.comment-content').val('');
+                    $('.submit-comment').attr('disabled', 'disabled');
+                }
+            });
+        });
+
+        // Right comment answer action (only connected users)
+        $('.submit-answer').click((e) => {
+            console.log($(e.target).data('comment-id'));
+            let commentId = $(e.target).data('comment-id');
+            let path = "{{ path('api_create_answer', {'commentId': 'COMMENT_ID'}) }}";
+            path = path.replace('COMMENT_ID', commentId);
+            let first = Math.floor(Math.random() * 2500);
+            let second = Math.floor(Math.random() * 2500);
+            let result = first % second;
+
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data: JSON.stringify({
+                    'content': $('.comment-answer[data-comment-id=' + commentId + ']').val()
+                }),
+                headers: {
+                    auth: 'Bearer ' + userToken,
+                    first: first,
+                    second: second,
+                    value: result
+                },
+                dataType: 'json',
+                success: function (d) {
+                    let htmlContent = '';
+                    console.info(d);
+                    htmlContent += '<div class="media-block"><a class="media-left"><img class="profile-picture img-circle img-sm" alt="Profile Picture" src="' + d.user_picture + '"></a> <div class="media-body"> <div class="mar-btm"> <a class="author btn-link text-semibold media-heading box-inline">' + d.user_fullname + ' - Just now</a> </div> <p class="comment">' + d.content + '</p> <div class="pad-ver"> <div class="btn-group"> </div> </div> <hr></div></div>';
+                    $('.media-body[data-id=' + commentId + ']').append(htmlContent);
+                    $('.comment-answer[data-comment-id=' + commentId + ']').val('');
+                    $(e.target).attr('disabled', 'disabled');
+                }
+            });
+        });
+
+    });
+</script>
+
+<script src="{{ asset('star-rating/jquery.star-rating-svg.min.js') }}"></script>
